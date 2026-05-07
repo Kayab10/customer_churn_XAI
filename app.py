@@ -18,7 +18,19 @@ from src.model import (
 
 @st.cache_resource(show_spinner=False)
 def load_pipeline():
-    return load_pipeline_from_pkl('model.pkl')
+    import os
+    import dill
+    pkl_path = 'model.pkl'
+    if not os.path.exists(pkl_path):
+        # Train and save if pkl doesn't exist (first run on any environment)
+        from src.model import load_raw_data, build_pipeline
+        raw = load_raw_data('data/Churn_Modelling.csv')
+        pipeline = build_pipeline(raw)
+        with open(pkl_path, 'wb') as f:
+            dill.dump(pipeline, f)
+        return pipeline
+    with open(pkl_path, 'rb') as f:
+        return dill.load(f)
 
 
 def render_overview(raw: pd.DataFrame, pipeline: dict):
@@ -58,7 +70,7 @@ def render_overview(raw: pd.DataFrame, pipeline: dict):
         labels={'Status': 'Churn Status', 'Count': 'Number of Customers'},
         color_discrete_map={'Stayed': '#2ecc71', 'Churned': '#e74c3c'},
     )
-    st.plotly_chart(fig_dist, use_container_width=True)
+    st.plotly_chart(fig_dist, width='stretch')
 
     # Churn by geography
     st.subheader('Churn by Geography')
@@ -72,7 +84,7 @@ def render_overview(raw: pd.DataFrame, pipeline: dict):
         labels={'Exited_Label': 'Churn Status'},
         color_discrete_map={'Stayed': '#2ecc71', 'Churned': '#e74c3c'},
     )
-    st.plotly_chart(fig_geo, use_container_width=True)
+    st.plotly_chart(fig_geo, width='stretch')
 
     # Two-column layout for tenure and salary charts
     col1, col2 = st.columns(2)
@@ -91,7 +103,7 @@ def render_overview(raw: pd.DataFrame, pipeline: dict):
             labels={'Exited_Label': 'Churn Status'},
             color_discrete_map={'Stayed': '#2ecc71', 'Churned': '#e74c3c'},
         )
-        st.plotly_chart(fig_tenure, use_container_width=True)
+        st.plotly_chart(fig_tenure, width='stretch')
 
     with col2:
         st.subheader('Estimated Salary vs Churn')
@@ -105,7 +117,7 @@ def render_overview(raw: pd.DataFrame, pipeline: dict):
             labels={'Exited_Label': 'Churn Status', 'EstimatedSalary': 'Estimated Salary ($)'},
             color_discrete_map={'Stayed': '#2ecc71', 'Churned': '#e74c3c'},
         )
-        st.plotly_chart(fig_salary, use_container_width=True)
+        st.plotly_chart(fig_salary, width='stretch')
 
     # Feature correlation heatmap
     st.subheader('Feature Correlation Heatmap')
@@ -118,7 +130,7 @@ def render_overview(raw: pd.DataFrame, pipeline: dict):
         color_continuous_scale='RdBu_r',
         labels={'color': 'Correlation'},
     )
-    st.plotly_chart(fig_corr, use_container_width=True)
+    st.plotly_chart(fig_corr, width='stretch')
 
 
 def render_prediction(raw: pd.DataFrame, pipeline: dict):
@@ -142,7 +154,7 @@ def render_prediction(raw: pd.DataFrame, pipeline: dict):
         active_member = col2.selectbox('Is active member', ['Yes', 'No'], index=0)
         salary = col2.number_input('Estimated salary ($)', min_value=0.0, value=112542.0, step=1000.0, format='%0.2f')
         
-        submitted = st.form_submit_button('🔮 Predict Churn', use_container_width=True)
+        submitted = st.form_submit_button('🔮 Predict Churn', width='stretch')
 
     if submitted:
         # Create user input row
@@ -232,7 +244,7 @@ def render_prediction(raw: pd.DataFrame, pipeline: dict):
                 title='Top 10 Features by SHAP Impact',
             )
             fig_shap.update_layout(height=400)
-            st.plotly_chart(fig_shap, use_container_width=True)
+            st.plotly_chart(fig_shap, width='stretch')
 
             # LIME explanation
             st.subheader('LIME Local Explanation')
@@ -276,7 +288,7 @@ def render_explainability(pipeline: dict):
         color_continuous_scale='Viridis',
     )
     fig_importance.update_layout(height=400)
-    st.plotly_chart(fig_importance, use_container_width=True)
+    st.plotly_chart(fig_importance, width='stretch')
 
     st.markdown('---')
 
@@ -302,11 +314,11 @@ def render_explainability(pipeline: dict):
         color_continuous_scale='RdYlGn_r',
     )
     fig_shap.update_layout(height=400)
-    st.plotly_chart(fig_shap, use_container_width=True)
+    st.plotly_chart(fig_shap, width='stretch')
 
     # Expandable table of top SHAP features
     with st.expander('📊 View Top 10 SHAP Features'):
-        st.dataframe(shap_summary.head(10).reset_index(drop=True), use_container_width=True)
+        st.dataframe(shap_summary.head(10).reset_index(drop=True), width='stretch')
 
     st.markdown('---')
 
@@ -334,7 +346,7 @@ def render_explainability(pipeline: dict):
     
     report_df = pd.DataFrame(metrics['classification_report']).transpose()
     report_df = report_df.round(3)
-    st.dataframe(report_df, use_container_width=True)
+    st.dataframe(report_df, width='stretch')
 
     # Confusion matrix
     st.subheader('Confusion Matrix')
@@ -351,7 +363,7 @@ def render_explainability(pipeline: dict):
         title='Confusion Matrix',
     )
     fig_conf.update_layout(height=400)
-    st.plotly_chart(fig_conf, use_container_width=True)
+    st.plotly_chart(fig_conf, width='stretch')
 
     st.markdown('---')
 
