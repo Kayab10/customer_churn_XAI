@@ -9,3 +9,4 @@ matplotlib
 joblib
 setuptools
 wheel
+plotly
