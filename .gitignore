@@ -1,5 +1,5 @@
+model.pkl
 __pycache__/
 *.pyc
 *.pyo
 .env
-src/__pycache__/model.cpython-311.pyc

@@ -184,9 +184,52 @@ def customer_recommendations(probability: float) -> List[str]:
     ]
 
 
-def load_pipeline_from_pkl(path: str = 'model.pkl'):
-    """Load a trained pipeline from a pickle file."""
-    import dill
-    with open(path, 'rb') as f:
-        pipeline = dill.load(f)
-    return pipeline
+def save_model_artifacts(pipeline: dict, model_path: str = 'model.json', meta_path: str = 'model_meta.pkl'):
+    """
+    Save artifacts in two parts:
+    - model.json : XGBoost native format (cross-platform, version-tolerant)
+    - model_meta.pkl : encoders, feature names, train/test splits (pure Python/numpy, safe to pickle)
+    """
+    import pickle
+
+    # Save XGBoost model natively
+    pipeline['model'].save_model(model_path)
+
+    # Save everything except the model and the unpicklable explainers
+    meta = {k: v for k, v in pipeline.items() if k not in ('model', 'shap_explainer', 'lime_explainer')}
+    with open(meta_path, 'wb') as f:
+        pickle.dump(meta, f)
+
+
+def load_model_artifacts(model_path: str = 'model.json', meta_path: str = 'model_meta.pkl') -> dict:
+    """
+    Load artifacts and rebuild SHAP/LIME explainers fresh.
+    Safe to use across platforms and library versions.
+    """
+    import pickle
+
+    # Load XGBoost model natively
+    model = xgb.XGBClassifier()
+    model.load_model(model_path)
+
+    # Load metadata
+    with open(meta_path, 'rb') as f:
+        meta = pickle.load(f)
+
+    # Rebuild explainers from the loaded model — cheap, no training needed
+    shap_explainer = shap.TreeExplainer(model)
+    lime_explainer = lime.lime_tabular.LimeTabularExplainer(
+        meta['train'].values,
+        feature_names=meta['feature_names'],
+        class_names=meta['class_names'],
+        categorical_features=[meta['feature_names'].index(f) for f in CATEGORICAL_FEATURES],
+        categorical_names={f: list(meta['categorical_names'][f]) for f in CATEGORICAL_FEATURES},
+        kernel_width=3,
+    )
+
+    return {
+        **meta,
+        'model': model,
+        'shap_explainer': shap_explainer,
+        'lime_explainer': lime_explainer,
+    }

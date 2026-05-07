@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from src.model import (
+    load_raw_data,
+    build_pipeline,
+    load_model_artifacts,
     FEATURE_COLUMNS,
     encode_features,
     predict_customer,
@@ -12,25 +15,15 @@ from src.model import (
     get_feature_importance,
     get_shap_values,
     evaluate_model,
-    load_pipeline_from_pkl,
 )
 
 
 @st.cache_resource(show_spinner=False)
 def load_pipeline():
-    import os
-    import dill
-    pkl_path = 'model.pkl'
-    if not os.path.exists(pkl_path):
-        # Train and save if pkl doesn't exist (first run on any environment)
-        from src.model import load_raw_data, build_pipeline
-        raw = load_raw_data('data/Churn_Modelling.csv')
-        pipeline = build_pipeline(raw)
-        with open(pkl_path, 'wb') as f:
-            dill.dump(pipeline, f)
-        return pipeline
-    with open(pkl_path, 'rb') as f:
-        return dill.load(f)
+    raw = load_raw_data('data/Churn_Modelling.csv')
+    pipeline = load_model_artifacts('model.json', 'model_meta.pkl')
+    pipeline['raw'] = raw
+    return pipeline
 
 
 def render_overview(raw: pd.DataFrame, pipeline: dict):

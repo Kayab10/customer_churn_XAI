@@ -1,15 +1,19 @@
 """
-Training script — run this once to train the model and save it to model.pkl.
+Training script — run this once to train the model and save artifacts.
+
+Saves:
+  model.json      — XGBoost model in native cross-platform format
+  model_meta.pkl  — encoders, feature names, train/test splits (pure Python/numpy)
 
 Usage:
     python train.py
 """
 
-import dill
-from src.model import load_raw_data, build_pipeline
+from src.model import load_raw_data, build_pipeline, save_model_artifacts
 
 DATA_PATH = 'data/Churn_Modelling.csv'
-MODEL_PATH = 'model.pkl'
+MODEL_PATH = 'model.json'
+META_PATH  = 'model_meta.pkl'
 
 
 def main():
@@ -19,11 +23,10 @@ def main():
     print('Training pipeline...')
     pipeline = build_pipeline(raw)
 
-    print(f'Saving pipeline to {MODEL_PATH}...')
-    with open(MODEL_PATH, 'wb') as f:
-        dill.dump(pipeline, f)
+    print(f'Saving artifacts to {MODEL_PATH} and {META_PATH}...')
+    save_model_artifacts(pipeline, MODEL_PATH, META_PATH)
 
-    print('Done. Model saved successfully.')
+    print('Done. Artifacts saved successfully.')
 
 
 if __name__ == '__main__':
