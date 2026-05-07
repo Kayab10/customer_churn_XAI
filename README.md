@@ -150,7 +150,7 @@ d:\learning\churn/
 ├── src/
 │   ├── __init__.py                # Package initialization
 │   └── model.py                   # ML pipeline, model, and utility functions
-├── explainable-ai-for-tabular-dataset-xgb-with-lime.ipynb  # Model training notebook
+├── notebook.ipynb  # Model training notebook
 └── steps.ipynb                    # Project planning & architecture notebook
 ```
 
@@ -165,7 +165,7 @@ d:\learning\churn/
 
 ---
 
-## 🔧 Architecture & Technical Details
+## 🔧 Architecture 
 
 ### Data Pipeline
 
@@ -190,7 +190,7 @@ MODEL_PARAMS = {
 
 ### Prediction Threshold
 
-- **Default**: 0.4 (not 0.5) to account for class imbalance
+- **Default**: 0.4 (not 0.5) to account for class imbalance(can also use SMOTE technique for better accuracy)
 - Customers with ≥ 40% churn probability are flagged as "Churn"
 - Risk levels calibrated: Low < 45%, Medium 45–75%, High ≥ 75%
 
@@ -256,7 +256,7 @@ MODEL_PARAMS = {
 2. Review model accuracy and confusion matrix
 3. Check feature importance rankings
 4. Verify model isn't overfitting to specific features
-5. Share insights with stakeholders
+5. Share insights 
 
 ---
 
@@ -328,48 +328,13 @@ Returns dict with accuracy, confusion matrix, classification report, etc.
 
 ## 📦 Dependencies
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| streamlit | ≥1.28.0 | Web app framework |
-| pandas | ≥1.3.0 | Data manipulation |
-| numpy | ≥1.21.0 | Numerical computing |
-| scikit-learn | ≥1.0.0 | ML utilities (encoders, metrics) |
-| xgboost | ≥1.5.0 | Gradient boosting model |
-| shap | ≥0.40.0 | SHAP explainability |
-| lime | ≥0.2.0 | LIME explainability |
-| plotly | ≥5.0.0 | Interactive visualizations |
 
-Install all at once:
 ```bash
 pip install -r requirements.txt
 ```
 
----
 
-## 🐛 Troubleshooting
 
-### Issue: "ModuleNotFoundError: No module named 'src'"
-**Solution**: Ensure you're running `streamlit run app.py` from the project root directory.
-
-### Issue: "AttributeError: Can't pickle local object 'BaseDiscretizer.__init__'"
-**Solution**: Already fixed! The app uses `@st.cache_resource` instead of `@st.cache_data` to avoid pickling LIME's lambda functions.
-
-### Issue: SHAP computation is slow
-**Solution**: This is normal—SHAP values are computed on-demand. The first Explainability page load may take 30–60 seconds. Subsequent loads use Streamlit's cache.
-
-### Issue: "ValueError: x is not the name of a column in 'data_frame'"
-**Solution**: Ensure `FEATURE_COLUMNS` in `src/model.py` matches the CSV column names. Check for typos or extra spaces.
-
-### Issue: Prediction threshold seems off
-**Solution**: The threshold is set to 0.4 (not 0.5) to account for class imbalance. Adjust in `src/model.py` if needed:
-```python
-label = int(proba >= 0.4)  # Change 0.4 to desired threshold
-```
-
-### Issue: "SHAP values have unexpected shape"
-**Solution**: Verify that the training data in the pipeline hasn't been modified. Restart the app to reload the pipeline.
-
----
 
 ## 🎓 Model Performance
 
@@ -393,22 +358,6 @@ These metrics reflect the inherent difficulty of churn prediction due to class i
 
 ---
 
-## 📈 Future Enhancements
-
-- [ ] Add more customer segmentation (RFM analysis)
-- [ ] Implement A/B testing framework for retention strategies
-- [ ] Add model retraining pipeline with drift detection
-- [ ] Integrate with CRM systems for direct recommendations
-- [ ] Add batch prediction for scoring entire customer base
-- [ ] Create customer retention dashboards
-- [ ] Implement feature engineering suggestions
-- [ ] Add model comparison (Random Forest, LightGBM, etc.)
-
----
-
-## 📝 License & Attribution
-
-This project is built for educational purposes using the Churn Modelling dataset. 
 
 ### Key Technologies:
 - **XGBoost**: Gradient boosting classifier
@@ -419,24 +368,4 @@ This project is built for educational purposes using the Churn Modelling dataset
 
 ---
 
-## 👥 Support & Contact
 
-For questions or issues:
-1. Check the **Troubleshooting** section above
-2. Review the Jupyter notebooks (`steps.ipynb`, `explainable-ai-for-tabular-dataset-xgb-with-lime.ipynb`)
-3. Check Streamlit documentation: https://docs.streamlit.io
-
----
-
-## 📚 Additional Resources
-
-- **SHAP Documentation**: https://shap.readthedocs.io/
-- **LIME Documentation**: https://lime-ml.readthedocs.io/
-- **XGBoost Documentation**: https://xgboost.readthedocs.io/
-- **Streamlit Documentation**: https://docs.streamlit.io/
-
----
-
-**Version**: 1.0  
-**Last Updated**: May 7, 2026  
-**Status**: Production Ready
