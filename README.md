@@ -114,9 +114,10 @@ Full per-class metrics (Stay vs. Churn):
 
 ### Installation
 
-1. **Clone or navigate to the project directory:**
+1. **Clone the repository:**
    ```bash
-   cd d:\learning\churn
+   git clone https://github.com/Kayab10/customer_churn_XAI.git
+   cd customer_churn_XAI
    ```
 
 2. **Install dependencies:**
@@ -124,7 +125,12 @@ Full per-class metrics (Stay vs. Churn):
    pip install -r requirements.txt
    ```
 
-3. **Ensure data file exists:**
+3. **Train the model locally** (generates `model.json` and `model_meta.pkl`):
+   ```bash
+   python train.py
+   ```
+
+4. **Ensure data file exists:**
    - Place `Churn_Modelling.csv` in the `data/` directory
 
 ### Running the App
@@ -141,17 +147,21 @@ The app will open in your default browser at `http://localhost:8501`.
 ## 📁 Project Structure
 
 ```
-d:\learning\churn/
+customer_churn_XAI/
 ├── app.py                          # Main Streamlit application
+├── train.py                        # Standalone training script (run once locally)
 ├── requirements.txt                # Python dependencies
 ├── README.md                       # This file
+├── model.json                      # Trained XGBoost model (native cross-platform format)
+├── model_meta.pkl                  # Encoders, feature names, train/test splits
+├── .gitignore                      # Git ignore rules
 ├── data/
 │   └── Churn_Modelling.csv        # Customer dataset (10,000 records, 13 features)
 ├── src/
 │   ├── __init__.py                # Package initialization
 │   └── model.py                   # ML pipeline, model, and utility functions
-├── notebook.ipynb  # Model training notebook
-└── steps.ipynb                    # Project planning & architecture notebook
+├── notebook.ipynb                  # Model training notebook
+└── steps.ipynb                     # Project planning & architecture notebook
 ```
 
 ### File Descriptions
@@ -159,9 +169,12 @@ d:\learning\churn/
 | File | Purpose |
 |------|---------|
 | `app.py` | Main Streamlit app with all three pages (Overview, Prediction, Explainability) |
+| `train.py` | Run once to train the model and save `model.json` + `model_meta.pkl` |
 | `src/model.py` | Core ML pipeline: data loading, encoding, model training, SHAP/LIME setup, predictions |
+| `model.json` | XGBoost model saved in native format — cross-platform, no version dependency |
+| `model_meta.pkl` | Encoders and data splits saved with standard pickle — safe across environments |
 | `data/Churn_Modelling.csv` | Customer dataset with 10,000 records and 13 columns |
-| `requirements.txt` | Python package dependencies with versions |
+| `requirements.txt` | Python package dependencies |
 
 ---
 
@@ -175,6 +188,10 @@ d:\learning\churn/
    - Encodes categorical features (Geography, Gender, HasCrCard, IsActiveMember)
 3. **Train-Test Split**: 80% train, 20% test with stratification
 4. **Model Training**: XGBoost classifier with balanced class weights
+5. **Artifact Saving**:
+   - `model.json` — XGBoost native format (cross-platform, no version dependency)
+   - `model_meta.pkl` — encoders, feature names, train/test splits (pure Python/numpy)
+6. **App Startup**: Loads `model.json` + `model_meta.pkl`, rebuilds SHAP/LIME explainers in-memory
 
 ### Model Configuration
 
@@ -275,6 +292,18 @@ Loads customer data from CSV.
 build_pipeline(raw: pd.DataFrame) -> dict
 ```
 Builds complete ML pipeline: encoding, training, SHAP/LIME setup.
+
+#### Save Artifacts
+```python
+save_model_artifacts(pipeline: dict, model_path: str, meta_path: str)
+```
+Saves XGBoost model as `model.json` (native format) and metadata as `model_meta.pkl`.
+
+#### Load Artifacts
+```python
+load_model_artifacts(model_path: str, meta_path: str) -> dict
+```
+Loads saved artifacts and rebuilds SHAP/LIME explainers fresh. Safe across platforms.
 
 #### Feature Encoding
 ```python
