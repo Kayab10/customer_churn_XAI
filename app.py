@@ -3,8 +3,6 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from src.model import (
-    load_raw_data,
-    build_pipeline,
     FEATURE_COLUMNS,
     encode_features,
     predict_customer,
@@ -14,14 +12,13 @@ from src.model import (
     get_feature_importance,
     get_shap_values,
     evaluate_model,
+    load_pipeline_from_pkl,
 )
 
 
 @st.cache_resource(show_spinner=False)
 def load_pipeline():
-    raw = load_raw_data('data/Churn_Modelling.csv')
-    pipeline = build_pipeline(raw)
-    return pipeline
+    return load_pipeline_from_pkl('model.pkl')
 
 
 def render_overview(raw: pd.DataFrame, pipeline: dict):

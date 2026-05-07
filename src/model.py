@@ -182,3 +182,11 @@ def customer_recommendations(probability: float) -> List[str]:
         'Highlight stable service and benefits',
         'Keep customers engaged with value offers',
     ]
+
+
+def load_pipeline_from_pkl(path: str = 'model.pkl'):
+    """Load a trained pipeline from a pickle file."""
+    import dill
+    with open(path, 'rb') as f:
+        pipeline = dill.load(f)
+    return pipeline
