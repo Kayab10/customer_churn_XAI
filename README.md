@@ -2,7 +2,7 @@
 
 A comprehensive Streamlit application for predicting customer churn using XGBoost with explainability powered by SHAP and LIME. Built for business users and data scientists to understand churn patterns and make data-driven retention decisions.
 
-[Dashboard](https://customerchurnxai.streamlit.app/)
+[Project link - Dashboard](https://customerchurnxai.streamlit.app/)
 
 ## 🎯 Overview
 
